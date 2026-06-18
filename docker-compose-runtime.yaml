@@ -1,0 +1,7 @@
+services:
+  client:
+    build:
+      context: ./client
+      target: runtime
+    ports:
+      - "80:3000"

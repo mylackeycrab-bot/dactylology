@@ -1,0 +1,11 @@
+services:
+  client:
+    build:
+      context: ./client
+      target: base
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    command: ["bun", "run", "dev", "--host"]

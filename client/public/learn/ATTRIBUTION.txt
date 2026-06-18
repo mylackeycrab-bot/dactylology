@@ -1,0 +1,32 @@
+ASL per-letter hand reference images: letters/*.svg
+
+Source: Wikimedia Commons — Category:ASL letters
+https://commons.wikimedia.org/wiki/Category:ASL_letters
+
+Each file (A.svg … Z.svg) is the corresponding "Sign language <X>.svg" file
+hosted on Wikimedia Commons, e.g.:
+  https://commons.wikimedia.org/wiki/File:Sign_language_A.svg
+  https://upload.wikimedia.org/wikipedia/commons/<hash>/Sign_language_<X>.svg
+
+Author: wpclipart.com — http://www.wpclipart.com/sign_language/American_ABCs/
+        Uploaded to Wikimedia Commons by user "Mx. Granger".
+
+License: Public Domain — wpclipart.com released these images into the public
+domain worldwide; they may be used for any purpose, with no conditions. No
+attribution legally required, but credited here as a courtesy and to preserve
+provenance. See each Commons file page for the full PD declaration.
+
+The previous single combined chart (asl_gallaudet.svg) is also kept here and
+is public domain too (Ds13 / Gallaudet-TT font / Marnanel); see below.
+
+---
+
+Earlier combined chart (kept but no longer used for the per-letter view):
+
+asl_gallaudet.svg
+Source: Wikimedia Commons — File:Asl_alphabet_gallaudet.svg
+https://commons.wikimedia.org/wiki/File:Asl_alphabet_gallaudet.svg
+Author: Ds13 at English Wikipedia; vectorised by Marnanel.
+Derived from the Gallaudet-TT font (David Rakowski, 1991), whose distribution
+states it may be used for any purpose and redistributed freely.
+License: Public Domain.

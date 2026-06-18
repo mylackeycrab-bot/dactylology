@@ -1,0 +1,523 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0f0f13;
+  --surface: #1a1a24;
+  --surface-2: #24243a;
+  --text: #e8e8f0;
+  --text-muted: #8888a0;
+  --green: #00ff88;
+  --yellow: #ffcc00;
+  --red: #ff3366;
+  --radius: 12px;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+}
+
+#root {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.app__main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Status Bar ─────────────────────────── */
+
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+}
+
+.status-badge {
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status--ok {
+  background: rgba(0, 255, 136, 0.15);
+  color: var(--green);
+}
+
+.status--warn {
+  background: rgba(255, 204, 0, 0.15);
+  color: var(--yellow);
+}
+
+.status--err {
+  background: rgba(255, 51, 102, 0.15);
+  color: var(--red);
+}
+
+.status--muted {
+  background: rgba(136, 136, 160, 0.15);
+  color: var(--text-muted);
+}
+
+.status-fps {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Source Picker ───────────────────────── */
+
+.source-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.source-picker__tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 4px;
+}
+
+.source-picker__file {
+  display: none;
+}
+
+.tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tab:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.tab--active {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.tab:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.source-picker__notice {
+  font-size: 0.8125rem;
+  color: var(--yellow);
+  margin: 0;
+}
+
+/* ─── Notice / inline messages ─────────────── */
+
+.notice {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.notice--err {
+  color: var(--red);
+  background: rgba(255, 51, 102, 0.08);
+}
+
+/* ─── Image mode actions ────────────────────── */
+
+.image-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn--small {
+  font-size: 0.8125rem;
+  padding: 6px 12px;
+}
+
+.camera-view--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 3;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  text-align: center;
+  padding: 16px;
+}
+
+/* ─── Camera View ────────────────────────── */
+
+.camera-view {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+/* Mirrored media layer: only the video/image + skeleton canvas flip so that
+   the HUD and subtitle text on top stay readable (not reversed). */
+.camera-view__media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.camera-view__media--mirror {
+  transform: scaleX(-1);
+}
+
+.camera-view__video,
+.camera-view__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Overlay letterboxes identically to the video/image so the skeleton
+   stays aligned with the hand regardless of the column's aspect ratio. */
+.camera-view__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+/* ─── HUD (top, un-mirrored) ───────────────── */
+
+.camera-view__hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 14px 16px;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Caption pill — only behind the text (YouTube/movie style), not the full
+   width, so footage stays visible around it. */
+.camera-view__hud-text {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 12px;
+  max-width: 100%;
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 1px rgba(0, 0, 0, 0.9);
+}
+
+.hud__letter {
+  font-size: 3.25rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--green);
+}
+
+.hud__letter--special {
+  color: #ffffff;
+  font-size: 2rem;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.hud__special-caption {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.hud__conf {
+  font-size: 3.25rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #ffffff;
+  /* Fixed-width, right-aligned slot sized for the max value ("100%"). The slot
+     itself never changes width, so the surrounding (centered) layout never
+     shifts as the digit count changes — the "%" stays pinned on the right. */
+  display: inline-block;
+  width: 4ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Subtitle (bottom, un-mirrored) ──────────── */
+
+.camera-view__subtitle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Caption pill — only behind the text (YouTube/movie style), not the full
+   width, so footage stays visible around it. */
+.camera-view__subtitle-text {
+  display: inline-block;
+  max-width: 100%;
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  font-size: 1.75rem;
+  line-height: 1.35;
+  font-weight: 600;
+  /* Soft outline so it stays legible if the footage is bright. */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 1px rgba(0, 0, 0, 0.9);
+  word-break: break-word;
+}
+
+.btn {
+  background: var(--surface-2);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: var(--text);
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn:hover {
+  background: #2e2e50;
+}
+
+.btn:active {
+  background: #3a3a60;
+}
+
+/* ─── Error Screen ───────────────────────── */
+
+.error-screen {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.error-screen h2 {
+  font-size: 1.5rem;
+  margin-bottom: 12px;
+}
+
+.error-screen p {
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.error-screen code {
+  background: var(--surface-2);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+}
+
+/* ─── Learn ──────────────────────────────── */
+
+.learn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.learn__letters {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 4px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 8px;
+}
+
+.learn__letter {
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 0;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.learn__letter:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.learn__letter--active {
+  background: var(--surface-2);
+  color: var(--green);
+}
+
+.learn__tip {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1.45;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.learn__camera {
+  position: relative;
+}
+
+.learn__camera-inner {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.learn__practice-stop {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.learn__practice-stop:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.learn__pip {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  z-index: 10;
+  width: 110px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.learn__pip-img-wrap {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.learn__pip-img-wrap--flash {
+  box-shadow: 0 0 0 3px var(--green);
+}
+
+.learn__pip-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ─── Responsive ─────────────────────────── */
+
+@media (max-width: 520px) {
+  #root {
+    padding: 8px;
+  }
+
+  .hud__letter {
+    font-size: 2.5rem;
+  }
+
+  .hud__letter--special {
+    font-size: 1.625rem;
+  }
+
+  .hud__conf {
+    font-size: 2.5rem;
+  }
+
+  .camera-view__subtitle-text {
+    font-size: 1.25rem;
+  }
+
+  .learn__letters {
+    grid-template-columns: repeat(7, 1fr);
+  }
+
+  .status-bar {
+    flex-wrap: wrap;
+  }
+}
