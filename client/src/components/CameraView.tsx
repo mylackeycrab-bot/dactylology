@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from 'react'
+import { useEffect, useRef, useState, type RefObject } from 'react'
 import type { Landmark, Prediction } from '../types'
 import { HAND_CONNECTIONS } from '../lib/constants'
 
@@ -84,10 +84,13 @@ export function CameraView({
   sentence = '',
   mirror = false,
 }: CameraViewProps) {
-  // Local fallback ref so the stream-binding effect always has a target even
-  // when the parent doesn't pass a videoRef (e.g. image-only usage).
   const localVideoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  // Track the live video's native resolution so the canvas bitmap matches its
+  // aspect ratio. A ResizeObserver on the video is less reliable than listening
+  // to 'loadedmetadata' / 'resize' events on the <video> element itself.
+  const [videoSize, setVideoSize] = useState({ w: 640, h: 480 })
 
   useEffect(() => {
     const video = (videoRef ?? localVideoRef).current
@@ -103,12 +106,35 @@ export function CameraView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stream])
 
-  // Canvas resolution matches the source's natural pixels so normalized [0,1]
-  // landmark coords draw 1:1. Both the <img>/<video> and the <canvas> overlay
-  // use object-fit:contain within a fixed-ratio container, so the skeleton
-  // stays aligned with the (possibly letterboxed) image regardless of aspect.
-  const canvasW = imageSrc && imageWidth ? imageWidth : 640
-  const canvasH = imageSrc && imageHeight ? imageHeight : 480
+  // Listen for video metadata / resize so the canvas always mirrors the video's
+  // native aspect ratio. This matters most on mobile where camera sensors have
+  // very different resolutions from laptop webcams.
+  useEffect(() => {
+    const video = (videoRef ?? localVideoRef).current
+    if (!video || imageSrc) return
+
+    const sync = () => {
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        setVideoSize({ w: video.videoWidth, h: video.videoHeight })
+      }
+    }
+
+    video.addEventListener('loadedmetadata', sync)
+    video.addEventListener('resize', sync)
+    // Also poll in case the events fire before we attach listeners.
+    sync()
+
+    return () => {
+      video.removeEventListener('loadedmetadata', sync)
+      video.removeEventListener('resize', sync)
+    }
+  }, [stream, imageSrc])
+
+  // Canvas bitmap dimensions — use the source's native resolution so the
+  // skeleton's [0,1] coords map 1:1 and CSS object-fit:contain on both the
+  // video/img and the overlay keeps them perfectly aligned.
+  const canvasW = imageSrc && imageWidth ? imageWidth : videoSize.w
+  const canvasH = imageSrc && imageHeight ? imageHeight : videoSize.h
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -135,8 +161,6 @@ export function CameraView({
         </span>
       )
     } else {
-      // Letters, 'space' and 'del' are all shown the same way: word/glyph +
-      // confidence, drawn at the same size.
       const glyph = hudGlyph(prediction.letter)
       hudContent = (
         <>
@@ -149,8 +173,6 @@ export function CameraView({
 
   return (
     <div className="camera-view">
-      {/* Mirrored media layer: video/image + skeleton canvas. The HUD and
-          subtitle live outside this layer so their text isn't flipped. */}
       <div className={'camera-view__media' + (mirror ? ' camera-view__media--mirror' : '')}>
         {imageSrc ? (
           <img
@@ -176,18 +198,12 @@ export function CameraView({
         />
       </div>
 
-      {/* Top HUD: predicted letter + confidence (un-mirrored), captioned
-          YouTube/movie-style — a soft black pill behind the text only.
-          Only rendered when there's prediction data to show. */}
       {prediction && (
         <div className="camera-view__hud">
           <div className="camera-view__hud-text">{hudContent}</div>
         </div>
       )}
 
-      {/* Bottom subtitle: committed sentence (un-mirrored), captioned
-          YouTube/movie-style — a soft black pill behind the text only.
-          Only shown when there's committed text (no placeholder). */}
       {sentence ? (
         <div className="camera-view__subtitle">
           <span className="camera-view__subtitle-text">{sentence}</span>

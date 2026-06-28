@@ -222,7 +222,7 @@ body {
 }
 
 /* Overlay letterboxes identically to the video/image so the skeleton
-   stays aligned with the hand regardless of the column's aspect ratio. */
+   stays aligned with the hand regardless of the device's aspect ratio. */
 .camera-view__overlay {
   position: absolute;
   inset: 0;
